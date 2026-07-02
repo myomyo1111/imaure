@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>イマウレ｜楽天の売れ筋がひと目でわかる無料ナビ</title>
+<style>
+  :root{
+    --red:#bf0000; --red-dark:#8e0000; --bg:#f7f5f2; --card:#ffffff;
+    --text:#2b2b2b; --sub:#8a8a8a; --gold:#c9a227; --up:#e0342f; --down:#2f6fe0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;background:var(--bg);color:var(--text);}
+  header{background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:#fff;padding:18px 16px 14px;text-align:center;}
+  header h1{font-size:20px;letter-spacing:.05em;}
+  header p{font-size:11px;opacity:.85;margin-top:4px;}
+  .pr-note{font-size:10px;color:var(--sub);text-align:center;padding:6px 10px;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 12px 40px;}
+  .tabs{display:flex;gap:6px;margin:12px 0 8px;}
+  .tabs button{flex:1;padding:10px 4px;border:none;border-radius:8px;background:#e8e2da;color:#555;font-size:13px;font-weight:bold;cursor:pointer;}
+  .tabs button.active{background:var(--red);color:#fff;}
+  .controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .controls select{flex:1;min-width:120px;padding:9px 8px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;}
+  .period{display:flex;gap:6px;margin-bottom:10px;}
+  .period button{flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:12px;cursor:pointer;color:#555;}
+  .period button.active{border-color:var(--red);color:var(--red);font-weight:bold;background:#fdf0f0;}
+  .status{font-size:11px;color:var(--sub);text-align:center;margin:6px 0;}
+  .card{background:var(--card);border-radius:12px;padding:12px;margin-bottom:10px;display:flex;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .rank-box{flex-shrink:0;width:44px;text-align:center;}
+  .rank-num{font-size:22px;font-weight:bold;color:var(--red);line-height:1.1;}
+  .rank-num.top3{color:var(--gold);font-size:26px;}
+  .badge{display:inline-block;font-size:10px;font-weight:bold;margin-top:3px;padding:1px 5px;border-radius:6px;background:#f0f0f0;color:#888;}
+  .badge.up{background:#fdeceb;color:var(--up);}
+  .badge.down{background:#eaf1fd;color:var(--down);}
+  .badge.new{background:#fff6dc;color:#a8831a;}
+  .item-img{width:72px;height:72px;object-fit:contain;border-radius:8px;background:#fafafa;flex-shrink:0;}
+  .item-body{flex:1;min-width:0;}
+  .item-name{font-size:12.5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .item-meta{font-size:11px;color:var(--sub);margin-top:4px;}
+  .item-price{font-size:15px;font-weight:bold;color:var(--red);margin-top:2px;}
+  .item-actions{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+  .item-actions a,.item-actions button{font-size:11px;padding:5px 9px;border-radius:14px;text-decoration:none;border:none;cursor:pointer;}
+  .btn-buy{background:var(--red);color:#fff;}
+  .btn-copy{background:#efe9df;color:#6b5b3e;}
+  .btn-maker{background:#fff;border:1px solid #ddd !important;color:#666;}
+  .more{display:block;width:100%;padding:13px;border:none;border-radius:10px;background:#fff;color:var(--red);font-weight:bold;font-size:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-top:6px;}
+  .note-banner{display:block;background:linear-gradient(135deg,#1c1533,#3a2a6b);color:#fff;border-radius:12px;padding:16px;text-align:center;text-decoration:none;margin:18px 0;}
+  .note-banner strong{display:block;font-size:15px;margin-bottom:4px;}
+  .note-banner span{font-size:11px;opacity:.85;}
+  .loading{text-align:center;padding:30px;color:var(--sub);font-size:13px;}
+  .error-box{background:#fdf0f0;border:1px solid #f0c0c0;border-radius:10px;padding:14px;font-size:12.5px;color:#8e0000;margin:10px 0;line-height:1.7;}
+  footer{text-align:center;font-size:10px;color:var(--sub);padding:20px 10px 30px;line-height:2;}
+  footer a{color:var(--sub);}
+  .setup{background:#fff;border-radius:12px;padding:20px;margin:16px 0;font-size:13px;line-height:2;}
+  .setup h2{font-size:15px;color:var(--red);margin-bottom:8px;}
+  .setup code{background:#f3efe8;padding:2px 6px;border-radius:4px;font-size:12px;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔭 イマウレ</h1>
+  <p>楽天の「いま売れてる」が、ひと目でわかる。毎日更新の無料ナビ</p>
+</header>
+<div class="pr-note">※本ページはアフィリエイト広告を利用しています</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <button id="tab-all" class="active" onclick="switchMode('all')">総合</button>
+    <button id="tab-genre" onclick="switchMode('genre')">ジャンル別</button>
+    <button id="tab-demo" onclick="switchMode('demo')">年代×性別</button>
+  </div>
+
+  <div class="controls" id="ctrl-genre" style="display:none;">
+    <select id="sel-genre" onchange="reload()"></select>
+  </div>
+  <div class="controls" id="ctrl-demo" style="display:none;">
+    <select id="sel-age" onchange="reload()">
+      <option value="20">20代</option><option value="30">30代</option>
+      <option value="40" selected>40代</option><option value="50">50代以上</option>
+      <option value="10">10代</option>
+    </select>
+    <select id="sel-sex" onchange="reload()">
+      <option value="0" selected>男性</option><option value="1">女性</option>
+    </select>
+  </div>
+
+  <div class="period">
+    <button id="p-daily" class="active" onclick="setPeriod('')">📅 デイリー</button>
+    <button id="p-realtime" onclick="setPeriod('realtime')">⚡ リアルタイム</button>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div id="list"></div>
+  <button class="more" id="btn-more" style="display:none;" onclick="loadMore()">さらに表示（31位以下も見る）</button>
+
+  <a class="note-banner" id="note-banner" href="#" target="_blank" rel="noopener" style="display:none;">
+    <strong>📖 このツールで「何を・どう投稿するか」まで知りたい方へ</strong>
+    <span>楽天Room攻略メンバーシップ｜投稿テンプレ毎月配信中 →</span>
+  </a>
+
+  <div id="setup-box" style="display:none;" class="setup">
+    <h2>⚙️ はじめての設定（配布者向け・1回だけ）</h2>
+    ① <a href="https://webservice.rakuten.co.jp/" target="_blank" rel="noopener">楽天ウェブサービス</a>でアプリIDを無料発行（アプリ名は「イマウレ」でOK）<br>
+    ② このHTMLをメモ帳で開き、<code>APP_ID</code> と <code>AFFILIATE_ID</code> を貼り替え<br>
+    ③ 保存してブラウザで開き直せば完成です
+  </div>
+</div>
+
+<div class="toast" id="toast">コピーしました</div>
+
+<footer>
+  <a href="https://webservice.rakuten.co.jp/" target="_blank" rel="noopener">Supported by Rakuten Developers</a><br>
+  ランキングデータ提供：楽天ウェブサービス（順位・価格は取得時点のものです）<br>
+  © BlueHandsEagle13 Publishing
+</footer>
+
+<script>
+/* ============================================================
+   ▼▼▼ 設定はここだけ（配布前に2ヶ所を貼り替えてください） ▼▼▼ */
+const CONFIG = {
+  APP_ID:        "ここに楽天アプリIDを貼る",
+  AFFILIATE_ID:  "ここに楽天アフィリエイトIDを貼る（無ければ空のままでOK）",
+  NOTE_URL:      ""   // noteメンバーシップのURL（用意できたら貼る）
+};
+/* ▲▲▲ 設定はここまで ▲▲▲
+   ============================================================ */
+
+const RANK_API  = "https://app.rakuten.co.jp/services/api/IchibaItem/Ranking/20220601";
+const GENRE_API = "https://app.rakuten.co.jp/services/api/IchibaGenre/Search/20140222";
+
+let state = { mode:"all", period:"", page:1, loading:false };
+
+function $(id){ return document.getElementById(id); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+
+/* --- JSONP（file://直開きでも動くように） --- */
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb = "rrn_cb_" + Math.random().toString(36).slice(2);
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error("timeout")); }, 10000);
+    function cleanup(){ delete window[cb]; script.remove(); clearTimeout(timer); }
+    window[cb] = (data)=>{ cleanup(); resolve(data); };
+    const script = document.createElement("script");
+    script.src = url + "&callback=" + cb;
+    script.onerror = ()=>{ cleanup(); reject(new Error("network")); };
+    document.body.appendChild(script);
+  });
+}
+
+function buildUrl(page){
+  let u = RANK_API + "?format=json&formatVersion=2&applicationId=" + encodeURIComponent(CONFIG.APP_ID) + "&page=" + page;
+  if (CONFIG.AFFILIATE_ID && CONFIG.AFFILIATE_ID.indexOf("ここに") === -1)
+    u += "&affiliateId=" + encodeURIComponent(CONFIG.AFFILIATE_ID);
+  if (state.mode === "genre") u += "&genreId=" + $("sel-genre").value;
+  if (state.mode === "demo")  u += "&age=" + $("sel-age").value + "&sex=" + $("sel-sex").value;
+  if (state.period) u += "&period=" + state.period;
+  return u;
+}
+
+/* --- 順位変動の記録（このブラウザ内に保存） --- */
+function sig(){ return [state.mode, state.mode==="genre"?$("sel-genre").value:"", state.mode==="demo"?$("sel-age").value+"_"+$("sel-sex").value:"", state.period].join("|"); }
+function loadHist(){
+  const key = "rrn_h_" + sig();
+  let h; try{ h = JSON.parse(localStorage.getItem(key) || "null"); }catch(e){ h = null; }
+  if (!h) h = { prevDate:null, prevRanks:{}, lastDate:todayStr(), lastRanks:{} };
+  if (h.lastDate !== todayStr()){
+    h.prevDate = h.lastDate; h.prevRanks = h.lastRanks;
+    h.lastDate = todayStr(); h.lastRanks = {};
+  }
+  return { key, h };
+}
+function saveHist(key,h){ try{ localStorage.setItem(key, JSON.stringify(h)); }catch(e){} }
+
+/* --- 描画 --- */
+function badgeHtml(h, code, rank){
+  if (!h.prevDate) return "";
+  const old = h.prevRanks[code];
+  if (old === undefined) return '<span class="badge new">NEW</span>';
+  const diff = old - rank;
+  if (diff > 0) return '<span class="badge up">▲'+diff+'</span>';
+  if (diff < 0) return '<span class="badge down">▼'+(-diff)+'</span>';
+  return '<span class="badge">→</span>';
+}
+
+function render(items, hist, append){
+  const list = $("list");
+  if (!append) list.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  items.forEach(raw=>{
+    const it = raw.Item || raw;
+    const code = it.itemCode || it.itemName;
+    hist.h.lastRanks[code] = it.rank;
+    const img = (it.mediumImageUrls && it.mediumImageUrls[0])
+      ? (typeof it.mediumImageUrls[0] === "string" ? it.mediumImageUrls[0] : it.mediumImageUrls[0].imageUrl) : "";
+    const link = it.affiliateUrl || it.itemUrl;
+    const review = it.reviewCount > 0 ? ("★"+Number(it.reviewAverage).toFixed(1)+"（"+it.reviewCount.toLocaleString()+"件）") : "レビューなし";
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML =
+      '<div class="rank-box"><div class="rank-num'+(it.rank<=3?' top3':'')+'">'+it.rank+'</div>'+badgeHtml(hist.h,code,it.rank)+'</div>'+
+      (img?'<img class="item-img" src="'+img+'" alt="" loading="lazy">':'')+
+      '<div class="item-body">'+
+        '<div class="item-name">'+escapeHtml(it.itemName)+'</div>'+
+        '<div class="item-meta">'+escapeHtml(it.shopName||"")+'｜'+review+'</div>'+
+        '<div class="item-price">'+Number(it.itemPrice).toLocaleString()+'円</div>'+
+        '<div class="item-actions">'+
+          '<a class="btn-buy" href="'+link+'" target="_blank" rel="noopener">商品ページへ</a>'+
+          '<button class="btn-copy" onclick=\'copyPost('+JSON.stringify(String(it.rank))+','+JSON.stringify(it.itemName)+','+JSON.stringify(String(it.itemPrice))+')\'>📋 投稿ネタをコピー</button>'+
+          '<a class="btn-maker" href="https://www.google.com/search?q='+encodeURIComponent(it.itemName.slice(0,30)+" 公式サイト")+'" target="_blank" rel="noopener">🔎 公式情報</a>'+
+        '</div>'+
+      '</div>';
+    frag.appendChild(div);
+  });
+  list.appendChild(frag);
+  saveHist(hist.key, hist.h);
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+function copyPost(rank, name, price){
+  const text = "【楽天ランキング"+rank+"位】\n"+name+"\n💰 "+Number(price).toLocaleString()+"円\n\nいま売れてる注目アイテムです✨\n#楽天room #楽天 #お買い物マラソン";
+  const done = ()=>{ const t=$("toast"); t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done);
+  else { const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
+}
+
+/* --- データ取得 --- */
+async function load(append){
+  if (state.loading) return;
+  state.loading = true;
+  $("btn-more").style.display = "none";
+  if (!append) $("list").innerHTML = '<div class="loading">⏳ 最新ランキングを取得中…</div>';
+  try{
+    const res = await jsonp(buildUrl(state.page));
+    if (res.error) throw new Error(res.error_description || res.error);
+    const items = res.Items || [];
+    if (!items.length) throw new Error("データが0件でした");
+    const hist = loadHist();
+    if (!append) $("list").innerHTML = "";
+    render(items, hist, append);
+    $("status").textContent = (res.lastBuildDate ? "更新: " + res.lastBuildDate + "　" : "") + "（開くたびに最新データを取得します）";
+    if (state.page < 34) $("btn-more").style.display = "block";
+  }catch(e){
+    const msg = e.message === "timeout" || e.message === "network"
+      ? "データを取得できませんでした。通信環境をご確認のうえ、少し時間をおいて再読み込みしてください。"
+      : "取得エラー: " + e.message + "（この条件の組み合わせは楽天API側で未対応の可能性があります。デイリーに切り替えてお試しください）";
+    if (!append) $("list").innerHTML = '<div class="error-box">'+escapeHtml(msg)+'</div>';
+  }
+  state.loading = false;
+}
+
+function loadMore(){ state.page++; load(true); }
+function reload(){ state.page = 1; load(false); }
+
+function switchMode(m){
+  state.mode = m;
+  ["all","genre","demo"].forEach(x=>$("tab-"+x).classList.toggle("active", x===m));
+  $("ctrl-genre").style.display = m==="genre" ? "flex" : "none";
+  $("ctrl-demo").style.display  = m==="demo"  ? "flex" : "none";
+  reload();
+}
+function setPeriod(p){
+  state.period = p;
+  $("p-daily").classList.toggle("active", !p);
+  $("p-realtime").classList.toggle("active", !!p);
+  reload();
+}
+
+/* --- ジャンル一覧（週1回キャッシュ） --- */
+async function initGenres(){
+  let cache; try{ cache = JSON.parse(localStorage.getItem("rrn_genres")||"null"); }catch(e){ cache=null; }
+  const week = 7*24*60*60*1000;
+  if (!cache || Date.now() - cache.time > week){
+    try{
+      const res = await jsonp(GENRE_API + "?format=json&formatVersion=2&applicationId=" + encodeURIComponent(CONFIG.APP_ID) + "&genreId=0");
+      const kids = (res.children||[]).map(c=>{ const g=c.child||c; return {id:g.genreId, name:g.genreName}; });
+      if (kids.length){ cache = {time:Date.now(), list:kids}; localStorage.setItem("rrn_genres", JSON.stringify(cache)); }
+    }catch(e){ /* キャッシュ無し・取得失敗時はセレクトが空のまま */ }
+  }
+  if (cache && cache.list){
+    $("sel-genre").innerHTML = cache.list.map(g=>'<option value="'+g.id+'">'+escapeHtml(g.name)+'</option>').join("");
+  }
+}
+
+/* --- 起動 --- */
+(function boot(){
+  if (!CONFIG.APP_ID || CONFIG.APP_ID.indexOf("ここに") !== -1){
+    $("setup-box").style.display = "block";
+    $("status").textContent = "アプリIDが未設定です。下の手順で設定してください。";
+    return;
+  }
+  if (CONFIG.NOTE_URL){
+    const b = $("note-banner"); b.href = CONFIG.NOTE_URL; b.style.display = "block";
+  }
+  initGenres();
+  load(false);
+})();
+</script>
+</body>
+</html>
